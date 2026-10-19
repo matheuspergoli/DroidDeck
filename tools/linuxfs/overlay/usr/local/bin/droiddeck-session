@@ -154,6 +154,11 @@ program_cores() {
   [ "${BL_PIN_CORES:-1}" = 0 ] && return 0
   command -v taskset >/dev/null 2>&1 || return 0
   if [ -n "${BL_GAME_CPUS:-}" ]; then echo "$BL_GAME_CPUS"; return 0; fi
+  local soc=${BL_SOC_MODEL:-}
+  # Oryon's lower-frequency cluster contains performance cores, not little cores.
+  case "${soc^^}" in
+    SM8750|SM8750-*|SM8850|SM8850-*) return 0 ;;
+  esac
   local f n max min= list=
   for f in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/cpuinfo_max_freq; do
     max=$(cat "$f" 2>/dev/null) || continue
