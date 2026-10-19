@@ -45,7 +45,31 @@ python3 -m unittest discover -s tools/tests -p test_output_refresh.py
 
 These are native host tests with controlled inputs, not Android compositor or
 game benchmarks. The normal CI discovers the additional Python test. Full APK
-build and test results must be recorded separately after completion.
+build and test results are recorded below.
+
+### Completed CI comparison
+
+Both builds completed successfully on the same upstream source base:
+
+| Target | Source commit | Run | Rust host | Python | Android/Gradle host |
+| --- | --- | --- | --- | --- | --- |
+| Control + Debian-image CI adaptation | `129ff5a` | [39189628257](https://github.com/matheuspergoli/DroidDeck/actions/runs/39189628257) | 152 passed | 930 tests | 1647 passed |
+| Control + PERF-001 | `ad356af` | [39189604940](https://github.com/matheuspergoli/DroidDeck/actions/runs/39189604940) | 152 passed | 937 tests | 1647 passed |
+
+The Android/Gradle reports show zero failures and zero ignored tests. Asset and
+library checks and test-key signature verification (v1/v2/v3) also passed.
+The seven additional Python tests are the timing regression suite above.
+
+APK SHA-256:
+
+- Control: `61716ab4543f4bb63fe8672077407ea14165e8ddd9086a6d44d8b5ed0672363c`.
+- Candidate: `fe740fdb3d53e2ffd52c02bd83a3e48acad0853873149c7451b3aa76c4f1f399`.
+
+These are public-test-key builds with the source's standard package ID, not
+official-release-signed updates or a completed personal distribution channel.
+CI success does not establish device cadence, game compatibility, or a measured
+performance gain. Documentation-only commits after these source commits do not
+change which bytes the linked artifacts were built from.
 
 ## Device acceptance still required
 
