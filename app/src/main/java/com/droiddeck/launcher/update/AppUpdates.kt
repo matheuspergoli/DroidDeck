@@ -95,6 +95,10 @@ object AppUpdates {
     @Volatile private var releaseSigned = BuildConfig.CI_BUILD
 
     fun init(context: Context) {
+        if (BuildConfig.HEIZMEN_BUILD) {
+            releaseSigned = false
+            return
+        }
         releaseSigned = runCatching {
             signers(context).any { it.equals(BuildConfig.RELEASE_SIGNER, ignoreCase = true) }
         }.getOrDefault(BuildConfig.CI_BUILD)

@@ -16,6 +16,12 @@ on:
       - 'LICENSE'
       - '.gitignore'
   workflow_dispatch:
+    inputs:
+      heizmen_build:
+        description: Build the independently packaged and personally signed DroidDeck Heizmen
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -27,6 +33,9 @@ concurrency:
 
 env:
   PRELOAD_CACHE_VERSION: v6
+  HEIZMEN_BUILD: ${{ github.event_name == 'workflow_dispatch' && inputs.heizmen_build && 'true' || 'false' }}
+  ORG_GRADLE_PROJECT_heizmenBuild: ${{ github.event_name == 'workflow_dispatch' && inputs.heizmen_build && 'true' || 'false' }}
+  ORG_GRADLE_PROJECT_heizmenBuildNumber: ${{ github.run_number }}
 
 jobs:
   build:
@@ -41,6 +50,17 @@ jobs:
         with:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
+
+      - name: Check personal signing prerequisites
+        if: env.HEIZMEN_BUILD == 'true'
+        env:
+          HEIZMEN_KEYSTORE_B64: ${{ secrets.HEIZMEN_KEYSTORE_B64 }}
+          HEIZMEN_STORE_PASSWORD: ${{ secrets.HEIZMEN_STORE_PASSWORD }}
+        run: |
+          test "$GITHUB_REPOSITORY" = "matheuspergoli/DroidDeck"
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test -n "$HEIZMEN_KEYSTORE_B64"
+          test -n "$HEIZMEN_STORE_PASSWORD"
 
       - name: Check co-authors
         if: github.event_name == 'pull_request'
@@ -559,11 +579,24 @@ jobs:
           grep -qi "CN=Android, OU=Android, O=Android" /tmp/sig.txt \
             || { echo "::error::apk is not signed with the AOSP testkey"; exit 1; }
 
+      - name: Sign and verify DroidDeck Heizmen
+        if: env.HEIZMEN_BUILD == 'true'
+        env:
+          HEIZMEN_KEYSTORE_B64: ${{ secrets.HEIZMEN_KEYSTORE_B64 }}
+          HEIZMEN_STORE_PASSWORD: ${{ secrets.HEIZMEN_STORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          export BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -1)
+          python3 tools/heizmen/sign_apk.py app/build/outputs/apk/release/app-release.apk
+
       - uses: actions/upload-artifact@v4
         id: apk-upload
         with:
-          name: droiddeck-apk
-          path: app/build/outputs/apk/release/*.apk
+          name: ${{ env.HEIZMEN_BUILD == 'true' && 'droiddeck-heizmen-apk' || 'droiddeck-apk' }}
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/release/heizmen-build.json
+            app/build/outputs/apk/release/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
           compression-level: 0

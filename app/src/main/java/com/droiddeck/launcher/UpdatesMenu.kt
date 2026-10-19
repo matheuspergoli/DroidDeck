@@ -44,7 +44,7 @@ internal class UpdatesMenu(private val activity: Activity, private val ui: Handl
         onDismissPermission = { askPermission = false; pending = null },
     )
 
-    val hasUpdate: Boolean get() = AppUpdates.hasUpdate(catalog, follow)
+    val hasUpdate: Boolean get() = !BuildConfig.HEIZMEN_BUILD && AppUpdates.hasUpdate(catalog, follow)
 
     fun onResume() {
         pending?.let { r ->
@@ -54,6 +54,7 @@ internal class UpdatesMenu(private val activity: Activity, private val ui: Handl
     }
 
     fun check(force: Boolean) {
+        if (BuildConfig.HEIZMEN_BUILD) return
         if (checking || stage != null) return
         val now = System.currentTimeMillis()
         if (!force && now - lastCheck < 60_000) return
@@ -81,6 +82,7 @@ internal class UpdatesMenu(private val activity: Activity, private val ui: Handl
     }
 
     private fun install(r: AppUpdates.Release) {
+        if (BuildConfig.HEIZMEN_BUILD) return
         if (stage != null) return
         val apk = r.apk ?: run { error = activity.getString(R.string.upd_no_download); return }
         AppUpdates.installBlock(r)?.let { error = it.message(activity); return }
@@ -119,6 +121,7 @@ internal class UpdatesMenu(private val activity: Activity, private val ui: Handl
     }
 
     fun start() {
+        if (BuildConfig.HEIZMEN_BUILD) return
         catalog = AppUpdates.cached(activity)
         follow = AppUpdates.follow(activity, catalog)
         val filter = IntentFilter(SelfInstaller.ACTION_STATUS)

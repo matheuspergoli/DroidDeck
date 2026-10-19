@@ -1,6 +1,7 @@
 package com.droiddeck.launcher.ui
 
 import com.droiddeck.launcher.R
+import com.droiddeck.launcher.BuildConfig
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.AnimatedVisibility
@@ -94,6 +95,22 @@ internal fun UpdatesPage(s: FrontEndState, a: FrontEndActions, modifier: Modifie
     val ua = a.updates
     val me = remember { AppUpdates.installed() }
     val colors = MaterialTheme.colorScheme
+    if (BuildConfig.HEIZMEN_BUILD) {
+        Column(modifier = modifier) {
+            PageHeader(stringResource(R.string.heizmen_app_name))
+            Text(
+                stringResource(R.string.heizmen_updates_manual),
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp),
+            )
+            Text(
+                "${me.version} · ${s.buildLabel}",
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        }
+        return
+    }
     Column(modifier = modifier) {
         PageHeader(stringResource(R.string.upd_title)) {
             Text(

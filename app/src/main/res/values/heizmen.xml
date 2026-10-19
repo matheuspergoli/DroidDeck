@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="heizmen_app_name" translatable="false">DroidDeck Heizmen</string>
+    <string name="heizmen_updates_manual">Personal experimental build. Install future DroidDeck Heizmen APKs signed with the same key to update this app. Official DroidDeck updates do not replace this installation. Steam, game and component updates remain available.</string>
+</resources>

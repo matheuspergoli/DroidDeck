@@ -1583,7 +1583,7 @@ class SessionService : Service() {
         )
         return Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_session)
-            .setContentTitle(getString(R.string.app_name))
+            .setContentTitle(getString(if (com.droiddeck.launcher.BuildConfig.HEIZMEN_BUILD) R.string.heizmen_app_name else R.string.app_name))
             .setContentText(getString(
                 when {
                     SessionState.suspended -> R.string.session_notification_paused

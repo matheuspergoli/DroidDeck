@@ -208,7 +208,7 @@ class AppFilesProvider : DocumentsProvider() {
         )
 
         fun titleFor(context: Context): String {
-            val name = context.getString(R.string.app_name)
+            val name = context.getString(if (com.droiddeck.launcher.BuildConfig.HEIZMEN_BUILD) R.string.heizmen_app_name else R.string.app_name)
             return when (context.packageName) {
                 "com.tencent.ig" -> "$name PUBG"
                 "com.antutu.benchmark.full" -> "$name AnTuTu"

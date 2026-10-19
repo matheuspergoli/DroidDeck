@@ -79,7 +79,12 @@ def sourceCommit = providers.environmentVariable('DROIDDECK_SOURCE_COMMIT').getO
     ?: providers.environmentVariable('GITHUB_SHA').getOrNull() ?: gitValue(['rev-parse', 'HEAD']) ?: ''
 def prNumber = (providers.environmentVariable('DROIDDECK_PR_NUMBER').getOrNull() ?: '0').with { it.isInteger() ? it : '0' }
 def ciBuild = providers.environmentVariable('GITHUB_ACTIONS').getOrNull() == 'true'
-def releaseSigner = rootProject.file('keystore/release-signer.sha256').text.trim()
+def heizmenBuild = providers.gradleProperty('heizmenBuild').orElse('false').get().toBoolean()
+def heizmenBuildNumber = providers.gradleProperty('heizmenBuildNumber').orElse('1').get().toInteger()
+if (heizmenBuild && (heizmenBuildNumber < 1 || heizmenBuildNumber > 2000000000)) {
+    throw new GradleException('heizmenBuildNumber must be between 1 and 2000000000')
+}
+def releaseSigner = rootProject.file(heizmenBuild ? 'keystore/heizmen-signer.sha256' : 'keystore/release-signer.sha256').text.trim()
 def commitTime = (gitValue(['show', '-s', '--format=%ct', 'HEAD']) ?: '0').with { it.isLong() ? it : '0' }
 def desktopKde = rootProject.file('tools/desktop-kde/release.env').readLines()
     .findAll { it.contains('=') && !it.startsWith('#') }
@@ -107,6 +112,9 @@ android {
         targetSdkVersion 28
         versionCode 14
         versionName "0.5.0"
+        if (heizmenBuild) versionCode(100000 + heizmenBuildNumber)
+        manifestPlaceholders = [launcherAppLabel: heizmenBuild ? '@string/heizmen_app_name' : '@string/app_name']
+        buildConfigField "boolean", "HEIZMEN_BUILD", heizmenBuild.toString()
         buildConfigField "String", "BUILD_LABEL", "\"${escapedBuildLabel}\""
         buildConfigField "String", "SOURCE_COMMIT", "\"${sourceCommit}\""
         buildConfigField "int", "PR_NUMBER", "${prNumber}"
@@ -165,6 +173,10 @@ android {
         release {
             minifyEnabled false
             signingConfig signingConfigs.testkey
+            if (heizmenBuild) {
+                applicationIdSuffix '.heizmen'
+                versionNameSuffix "-heizmen.${heizmenBuildNumber}"
+            }
         }
     }
 
