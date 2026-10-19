@@ -58,8 +58,28 @@ bash -n tools/linuxfs/overlay/usr/local/bin/droiddeck-session
 
 The local runs passed 7 new tests, 3 Steam mask tests and 11 launcher-governor
 tests. These are controlled host tests, not measurements from a Galaxy S25+.
-Full build results belong to the exact source commits and CI runs recorded
-after completion.
+Full build results are recorded against the exact source commits below.
+
+### Completed CI builds
+
+| Target | Source | Run | Rust host | Python | Android/Gradle host |
+| --- | --- | --- | --- | --- | --- |
+| Control + CI adaptation | `daa6b5a` | [39211661860](https://github.com/matheuspergoli/DroidDeck/actions/runs/39211661860) | 152 passed | 930 tests | 1652 passed |
+| Control + PERF-002 | `cbcfaf3` | [39211655349](https://github.com/matheuspergoli/DroidDeck/actions/runs/39211655349) | 152 passed | 937 tests | 1652 passed |
+
+Both workflows succeeded. Android/Gradle reports show zero failures and zero
+ignored tests. The seven additional Python tests are the new affinity suite.
+Asset/library checks and test-key v1/v2/v3 signature verification passed.
+
+APK SHA-256:
+
+- Control: `a996ce15813bc70817c1e8ecc6379fd712a43c64ae60014ebd4a6cc3fd8d3a0e`.
+- Candidate: `c5b7dfca740752e8b535a35e72d22953248df9946b7eed7e47cde8258b5ca862`.
+
+These APKs retain the source's standard package ID and public test-key signing.
+They are not official-release-signed updates or a completed personal install
+channel. Documentation-only commits after these runs do not change the source
+identity of their artifacts. Successful host suites are not device benchmarks.
 
 ## Acceptance and recovery
 
