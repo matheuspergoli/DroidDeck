@@ -57,8 +57,8 @@ def main():
                 tools / "apksigner", "verify", "--min-sdk-version", "26",
                 "--verbose", "--print-certs", signed,
             ])
-            digests = re.findall(r"Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]{64})", verification)
-            if [digest.lower() for digest in digests] != [expected]:
+            digests = re.findall(r"^(?:Signer #\d+|V\d+(?:\.\d+)? Signer:) certificate SHA-256 digest: ([0-9a-fA-F]{64})$", verification, re.MULTILINE)
+            if not digests or {digest.lower() for digest in digests} != {expected} or "Number of signers: 1" not in verification:
                 raise RuntimeError("APK signer does not match the committed personal certificate")
             for scheme in ("v1 scheme (JAR signing)", "v2 scheme (APK Signature Scheme v2)",
                            "v3 scheme (APK Signature Scheme v3)"):
